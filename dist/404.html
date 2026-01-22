@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>SouFIT - redirecionando</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      (function () {
+        const isLocal = window.location.hostname === "localhost";
+        const base = isLocal ? "/" : "/FIT2.0/";
+        const path =
+          window.location.pathname + window.location.search + window.location.hash;
+        const redirectUrl = `${base}index.html?redirect=${encodeURIComponent(
+          path
+        )}`;
+        window.location.replace(redirectUrl);
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecionando para SouFIT...</p>
+  </body>
+</html>
