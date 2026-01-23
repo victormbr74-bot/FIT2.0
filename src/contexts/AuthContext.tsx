@@ -15,17 +15,19 @@ import {
 } from "firebase/auth";
 import {
   doc,
-  getDoc,
+  onSnapshot,
   serverTimestamp,
   setDoc,
   type FieldValue,
-  type Timestamp
+  type Timestamp,
+  type Unsubscribe
 } from "firebase/firestore";
 import {
   auth,
   firestore,
   isFirebaseConfigured
 } from "../services/firebase";
+import { ensureCurrentWeek } from "../services/weekService";
 
 type FirestoreTimestamp = Timestamp | FieldValue | null;
 
@@ -35,6 +37,23 @@ export type UserProfile = {
   onboardingComplete: boolean;
   createdAt?: FirestoreTimestamp;
   updatedAt?: FirestoreTimestamp;
+  age?: number;
+  heightCm?: number;
+  weightKg?: number;
+  goal?: "emagrecimento" | "hipertrofia" | "condicionamento";
+  workoutsPerWeek?: number;
+  muscleGroups?: string[];
+  level?: "iniciante" | "intermediario" | "avancado";
+  youtubePlaylistUrl?: string;
+  diet?: {
+    currentPdfUrl?: string;
+    updatedAt?: FirestoreTimestamp;
+  };
+  stats?: {
+    lastWeekId?: string;
+    pointsThisWeek?: number;
+    totalPoints?: number;
+  };
 };
 
 type AuthContextValue = {
@@ -59,11 +78,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    let cancelled = false;
+    let profileUnsubscribe: Unsubscribe | undefined;
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (cancelled) {
-        return;
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (profileUnsubscribe) {
+        profileUnsubscribe();
+        profileUnsubscribe = undefined;
       }
 
       setUser(firebaseUser);
@@ -74,23 +94,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const snapshot = await getDoc(doc(firestore, "users", firebaseUser.uid));
-
-      if (!cancelled) {
-        setProfile(
-          snapshot.exists()
-            ? (snapshot.data() as UserProfile)
-            : null
-        );
-        setLoading(false);
-      }
+      setLoading(true);
+      const profileRef = doc(firestore, "users", firebaseUser.uid);
+      profileUnsubscribe = onSnapshot(
+        profileRef,
+        (snapshot) => {
+          setProfile(
+            snapshot.exists()
+              ? (snapshot.data() as UserProfile)
+              : null
+          );
+          setLoading(false);
+        },
+        () => {
+          setProfile(null);
+          setLoading(false);
+        }
+      );
     });
 
     return () => {
-      cancelled = true;
+      if (profileUnsubscribe) {
+        profileUnsubscribe();
+      }
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (user && profile?.onboardingComplete && firestore) {
+      ensureCurrentWeek(user.uid, profile).catch(() => {
+        /* fail silently; hook will show error if needed */
+      });
+    }
+  }, [user, profile?.onboardingComplete]);
 
   const register = async (name: string, email: string, password: string) => {
     if (!isFirebaseConfigured || !auth || !firestore) {

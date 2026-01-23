@@ -61,6 +61,19 @@ O generator já associa `media` e `tips` ao construir o treino, e as dicas padr�
 - `src/services/firebase.ts`: inicialização e exportação de `auth`, `firestore` e `storage`.
 - `src/services/workoutService.ts`: funções auxiliares para salvar e carregar semanas (`userWeeks/{uid}_{weekId}`), garantindo compatibilidade com o modelo de dados atualizado.
 
+## Funcionalidades implementadas
+
+- **Onboarding guiado** (`src/pages/OnboardingPage.tsx`): wizard em 3 etapas que coleta idade, peso, objetivo, frequência, grupos musculares, nível e playlist pessoal, salvando em `users/{uid}` e atualizando `onboardingComplete`.
+- **Semana atual e plano automático** (`src/services/workoutGenerator.ts` + `src/services/weekService.ts`): ao logar (ou assim que o onboarding é concluído) geramos o `weekId` ISO, criamos `userWeeks/{uid}_{weekId}` com treinos pré-definidos (GIF/YouTube + dicas), checklist de dieta e zera os pontos da semana se rolou reset na segunda-feira.
+- **Home / Workout / Diet / Progress / Settings**:  
+  - `/home`: resumo de treinos, dieta concluída, pontos da semana, objetivos e peso atuais.  
+  - `/workout`: lista o treino do dia, permite marcar exercícios e assistir mídia somente quando expande (lazy load) e gera +10 pontos ao concluir.  
+  - `/diet`: upload de PDF direto para Storage (`users/{uid}/diet/current_<timestamp>.pdf`), checklist diário com +5 pontos por dia, e botão “Abrir dieta”.  
+  - `/progress`: registro histórico de peso (`users/{uid}/progress/{YYYY-MM-DD}`) e visualização em lista.  
+  - `/settings`: edição de objetivo, peso e playlist do YouTube.
+- **Contexto e hooks**: `AuthContext` sincroniza o perfil em tempo real e garante que o doc semanal seja criado assim que o Firestore estiver pronto; o hook `useWeeklyPlan` expõe o plano atual a qualquer tela.
+- **PWA**: o build usa `vite-plugin-pwa` e o manifest é gerado automaticamente, garantindo instalação do app com o mesmo base `/FIT2.0/` usado no GitHub Pages.
+
 ## Próximos passos
 
 1. Conectar autenticação com telas de login.
