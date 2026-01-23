@@ -32,11 +32,11 @@ import { useAuth } from "../contexts/AuthContext";
 const drawerWidth = 220;
 
 const navItems = [
-  { label: "Home", path: "/home", icon: <HomeIcon /> },
-  { label: "Workout", path: "/workout", icon: <FitnessCenterIcon /> },
-  { label: "Diet", path: "/diet", icon: <RestaurantMenuIcon /> },
-  { label: "Progress", path: "/progress", icon: <InsightsIcon /> },
-  { label: "Settings", path: "/settings", icon: <SettingsIcon /> }
+  { label: "Início", path: "/home", icon: <HomeIcon /> },
+  { label: "Treino", path: "/workout", icon: <FitnessCenterIcon /> },
+  { label: "Dieta", path: "/diet", icon: <RestaurantMenuIcon /> },
+  { label: "Progresso", path: "/progress", icon: <InsightsIcon /> },
+  { label: "Configurações", path: "/settings", icon: <SettingsIcon /> }
 ];
 
 function NavigationList({ onClick }: { onClick?: () => void }) {
@@ -98,7 +98,14 @@ export function MainLayout() {
   const drawerContent = (
     <Box sx={{ width: drawerWidth, display: "flex", flexDirection: "column" }}>
       <Toolbar>
-        <Typography variant="h6">SouFIT</Typography>
+        <Box>
+          <Typography variant="subtitle2" color="text.secondary">
+            SouFIT
+          </Typography>
+          <Typography variant="h6" noWrap>
+            Olá, {profile?.name ?? "SouFIT"}
+          </Typography>
+        </Box>
       </Toolbar>
       <Divider />
       <NavigationList onClick={() => setMobileOpen(false)} />

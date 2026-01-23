@@ -7,6 +7,7 @@ import {
   FormControl,
   FormControlLabel,
   FormGroup,
+  Grid,
   InputAdornment,
   MenuItem,
   Paper,
@@ -17,16 +18,22 @@ import {
   TextField,
   Typography
 } from "@mui/material";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { firestore, isFirebaseConfigured } from "../services/firebase";
+import { measurementOptionalFields } from "../services/progressService";
 
 type OnboardingValues = {
   age: string;
   heightCm: string;
   weightKg: string;
+  waistCm: string;
+  chestCm: string;
+  hipCm: string;
+  armCm: string;
+  thighCm: string;
   goal: "emagrecimento" | "hipertrofia" | "condicionamento";
   workoutsPerWeek: number;
   muscleGroups: string[];
@@ -53,6 +60,11 @@ export function OnboardingPage() {
     age: "",
     heightCm: "",
     weightKg: "",
+    waistCm: "",
+    chestCm: "",
+    hipCm: "",
+    armCm: "",
+    thighCm: "",
     goal: "emagrecimento",
     workoutsPerWeek: 3,
     muscleGroups: [],
@@ -131,6 +143,31 @@ export function OnboardingPage() {
         },
         { merge: true }
       );
+      const today = new Date().toISOString().split("T")[0];
+      const measurementRef = doc(firestore, "users", user.uid, "measurements", today);
+      const measurementSnapshot = await getDoc(measurementRef);
+      const measurementPayload: Record<string, unknown> = {
+        date: today,
+        dateISO: today,
+        weightKg: Number(values.weightKg)
+      };
+
+      measurementOptionalFields.forEach((field) => {
+        const raw = values[field.key].trim();
+        if (!raw) {
+          return;
+        }
+        const parsed = Number(raw);
+        if (!Number.isNaN(parsed) && parsed > 0) {
+          measurementPayload[field.key] = parsed;
+        }
+      });
+
+      if (!measurementSnapshot.exists()) {
+        measurementPayload.createdAt = serverTimestamp();
+      }
+
+      await setDoc(measurementRef, measurementPayload, { merge: true });
 
       setRedirectPending(true);
     } catch (err) {
@@ -201,6 +238,29 @@ export function OnboardingPage() {
               }
               required
             />
+            <Box>
+              <Typography variant="subtitle2" color="text.secondary">
+                Medidas adicionais (cm) — opcional
+              </Typography>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
+                {measurementOptionalFields.map((field) => (
+                  <Grid item xs={12} sm={6} md={4} key={field.key}>
+                    <TextField
+                      label={field.label}
+                      type="number"
+                      value={values[field.key]}
+                      onChange={(event) =>
+                        setValues((prev) => ({
+                          ...prev,
+                          [field.key]: event.target.value
+                        }))
+                      }
+                      fullWidth
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
           </Stack>
         );
       case 1:

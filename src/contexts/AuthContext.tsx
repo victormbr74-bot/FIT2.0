@@ -28,6 +28,7 @@ import {
   isFirebaseConfigured
 } from "../services/firebase";
 import { ensureCurrentWeek } from "../services/weekService";
+import { ensureInitialMeasurement } from "../services/progressService";
 
 type FirestoreTimestamp = Timestamp | FieldValue | null;
 
@@ -134,6 +135,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     }
   }, [user, profile?.onboardingComplete]);
+
+  useEffect(() => {
+    if (!user || !profile?.onboardingComplete) {
+      return;
+    }
+    ensureInitialMeasurement(user.uid, profile).catch(() => {
+      console.warn("Não foi possível garantir a medida inicial.");
+    });
+  }, [user, profile]);
 
   const register = async (name: string, email: string, password: string) => {
     if (!isFirebaseConfigured || !auth || !firestore) {

@@ -122,3 +122,23 @@ O repositório **FIT2.0** é publicado como site estático em `https://<seu-usu�
 3. O build já respeita `src/assets` e `public/gifs` graças à base configurada, e o `public/404.html` garante que o GitHub Pages redirecione rotas SPA para `index.html`.
 
 4. Após o deploy, verifique `https://<seu-usuário>.github.io/FIT2.0/home` para garantir que o SPA carrega sem 404.
+
+## Utilizando as novidades
+
+### Registrar medidas e progresso
+
+- O onboarding grava automaticamente o primeiro registro em `users/{uid}/measurements/{YYYY-MM-DD}` com peso e, quando presentes, cintura, peito, quadril, braço e coxa. Esse documento serve de ponto de partida para o histórico usado no gráfico principal e no resumo da Home.
+- A página `/progress` mantém o formulário obrigatório de peso e campos adicionais opcionais, escreve o documento do dia atual e recalcula o gráfico Recharts em tempo real (o helper `ensureInitialMeasurement` reforça a existência da primeira medida).
+- O histórico lista cada entrada com chips para circunferências, e a Home mostra o peso atual, a diferença rumo ao primeiro registro e um mini sparkline de até cinco últimos pesos.
+
+### Incluir mídia (GIF/Youtube) nos exercícios
+
+- Cada exercício da `exerciseLibrary` em `src/services/workoutGenerator.ts` pode ter `media` (tipo `gif` ou `youtube`) e `tips`. Edite ou adicione entradas nessa lista para incluir novos vídeos, GIFs ou orientações.
+- GIFs locais devem usar `import.meta.env.BASE_URL` ao construir a URL (por exemplo: ``${import.meta.env.BASE_URL}gifs/plank.gif``) para respeitar o `base` `/FIT2.0/`. Links do YouTube podem usar o embed (`https://www.youtube.com/embed/ID`) ou a própria playlist, que também é carregada quando o usuário abre o acordeão “Ver como fazer”.
+- Se quiser que a playlist apareça diretamente na tela de treino, cole a URL da playlist nas configurações (`/settings`); o botão “Mostrar player” alterna o iframe incorporado sem disparar o player global.
+
+### Cadastrar dieta por refeições
+
+- Use o card “Plano de refeições” na página Dieta para detalhar cada refeição (café da manhã, lanche da manhã, almoço, lanche da tarde, jantar e ceia) informando horário, descrição e calorias. O botão agora diz “Adicionar/Editar dieta” para deixar claro que você pode atualizar o plano periodicamente.
+- Ao salvar, o Firestore escreve em `users/{uid}/dietPlan/current` o objeto `{ meals: [{ name, time?, itemsText?, kcal? }], kcalPerDay?, updatedAt: serverTimestamp() }`. Ao reabrir a página, os campos são preenchidos com o mesmo payload.
+- O checklist diário e o upload de PDF (`users/{uid}.diet.currentPdfUrl`) continuam disponíveis como alternativas rápidas, mas priorize o plano estruturado com metas de calorias.

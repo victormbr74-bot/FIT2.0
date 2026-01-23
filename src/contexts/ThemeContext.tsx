@@ -22,30 +22,33 @@ const getInitialMode = (): ThemeMode => {
 };
 
 const buildTheme = (mode: ThemeMode) => {
+  const primaryMain = mode === "dark" ? "#00d8ff" : "#0a64ff";
+  const secondaryMain = mode === "dark" ? "#ff6b6b" : "#ff6d00";
   const palette: ThemeOptions["palette"] = {
     mode,
     primary: {
-      main: mode === "dark" ? "#00bcd4" : "#0a64ff"
+      main: primaryMain
     },
     secondary: {
-      main: mode === "dark" ? "#ff4081" : "#ff6d00"
+      main: secondaryMain
     },
     background: {
-      default: mode === "dark" ? "#030912" : "#f5f7fb",
-      paper: mode === "dark" ? "#0a1521" : "#ffffff"
+      default: mode === "dark" ? "#020814" : "#f3f6fb",
+      paper: mode === "dark" ? "#0b1320" : "#ffffff"
     },
     text: {
-      primary: mode === "dark" ? "#f4f8ff" : "#0d1b2a",
-      secondary: mode === "dark" ? "#aab8d7" : "#4f5961"
+      primary: mode === "dark" ? "#f4f8ff" : "#0f172a",
+      secondary: mode === "dark" ? "#aab8d7" : "#475569"
     },
-    divider: mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.15)"
+    divider: mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.12)"
   };
 
   return createTheme({
     palette,
     spacing: 8,
     typography: {
-      fontFamily: '"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif',
+      fontFamily:
+        '"Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif',
       button: {
         textTransform: "none",
         fontWeight: 700
@@ -69,8 +72,14 @@ const buildTheme = (mode: ThemeMode) => {
         styleOverrides: {
           root: {
             border: "1px solid",
-            borderColor: mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(18,52,84,0.08)",
-            boxShadow: mode === "dark" ? "0 20px 40px rgba(0,0,0,0.5)" : "0 20px 40px rgba(10,30,80,0.12)"
+            borderColor: mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(15,23,42,0.08)",
+            background: mode === "dark"
+              ? "linear-gradient(180deg, rgba(9,18,36,0.95), rgba(5,8,20,0.95))"
+              : undefined,
+            boxShadow:
+              mode === "dark"
+                ? "0 15px 40px rgba(0,0,0,0.45)"
+                : "0 15px 35px rgba(15,23,42,0.15)"
           }
         }
       },
@@ -78,11 +87,33 @@ const buildTheme = (mode: ThemeMode) => {
         styleOverrides: {
           root: {
             borderRadius: 999,
-            padding: "10px 20px",
-            boxShadow: "none"
+            padding: "12px 26px",
+            fontWeight: 700,
+            boxShadow: "0 12px 30px rgba(0,0,0,0.25)"
           },
-          contained: {
-            boxShadow: "none"
+          containedPrimary: {
+            background: `linear-gradient(135deg, ${primaryMain}, ${secondaryMain})`,
+            color: "#fff",
+            boxShadow: "0 15px 25px rgba(0,0,0,0.45)"
+          },
+          outlinedPrimary: {
+            borderColor: primaryMain
+          }
+        }
+      },
+      MuiChip: {
+        styleOverrides: {
+          root: {
+            borderRadius: 999
+          }
+        }
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            margin: "4px 8px",
+            transition: "background 0.3s"
           }
         }
       },
@@ -98,16 +129,16 @@ const buildTheme = (mode: ThemeMode) => {
           root: {
             background:
               mode === "dark"
-                ? "linear-gradient(180deg, rgba(5,16,29,0.9), rgba(5,16,29,0.85))"
+                ? "linear-gradient(180deg, rgba(4,8,16,0.95), rgba(6,12,24,0.95))"
                 : "linear-gradient(180deg, #0d47a1, #1a75ff)",
-            boxShadow: "0 8px 30px rgba(0,0,0,0.35)"
+            boxShadow: "0 12px 35px rgba(0,0,0,0.45)"
           }
         }
       },
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            background: mode === "dark" ? "#061021" : "#e3edff"
+            background: mode === "dark" ? "#050b1b" : "#e3edff"
           }
         }
       }

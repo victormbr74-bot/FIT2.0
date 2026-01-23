@@ -1,6 +1,6 @@
 import { FirebaseApp, FirebaseOptions, getApps, initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { enableIndexedDbPersistence, getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig: FirebaseOptions = {
@@ -18,13 +18,32 @@ export const isFirebaseConfigured = Object.values(firebaseConfig).every(
 );
 
 let firebaseApp: FirebaseApp | undefined;
+let firestoreInstance = null as ReturnType<typeof getFirestore> | null;
 
 if (isFirebaseConfigured) {
   firebaseApp = getApps()[0] ?? initializeApp(firebaseConfig);
+  if (firebaseApp) {
+    firestoreInstance = getFirestore(firebaseApp);
+    enableIndexedDbPersistence(firestoreInstance, { synchronizeTabs: true })
+      .then(() => {
+        console.info("Persistência offline do Firestore habilitada.");
+      })
+      .catch((error) => {
+        if (error.code === "failed-precondition") {
+          console.warn(
+            "Persistência offline não habilitada: múltiplas abas abertas (synchronizeTabs habilitado)."
+          );
+        } else if (error.code === "unimplemented") {
+          console.warn("Persistência offline não suportada neste navegador.");
+        } else {
+          console.warn("Erro ao habilitar persistência offline do Firestore:", error);
+        }
+      });
+  }
 }
 
 export const auth = firebaseApp ? getAuth(firebaseApp) : null;
-export const firestore = firebaseApp ? getFirestore(firebaseApp) : null;
+export const firestore = firestoreInstance;
 export const storage = firebaseApp ? getStorage(firebaseApp) : null;
 
 export type FirebaseServices = {
