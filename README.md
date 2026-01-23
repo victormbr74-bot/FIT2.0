@@ -74,6 +74,15 @@ O generator já associa `media` e `tips` ao construir o treino, e as dicas padr�
 - **Contexto e hooks**: `AuthContext` sincroniza o perfil em tempo real e garante que o doc semanal seja criado assim que o Firestore estiver pronto; o hook `useWeeklyPlan` expõe o plano atual a qualquer tela.
 - **PWA**: o build usa `vite-plugin-pwa` e o manifest é gerado automaticamente, garantindo instalação do app com o mesmo base `/FIT2.0/` usado no GitHub Pages.
 
+## Atualizações recentes
+
+- Cabeçalho agora resgata o nome do usuário, mostra avatar e menu com atalhos para configurações e saída.
+- Tema FIT com modos escuro/claro persistidos em `localStorage` e cards mais contrastantes/próximos ao estilo esportivo.
+- Página Dieta ganhou o botão “Adicionar dieta”, upload de PDF com feedback via snackbar, coleta de observações e checklist diário com status.
+- Treino permite ver mídias responsivas (GIF ou YouTube) via acordeão e personalizar o dia atual trocando ou adicionando exercícios em modal.
+- Progresso traz gráfico com Recharts, lista de registros e home exibe mini-resumo (peso atual, diferença e sparkline).
+- Sistema de níveis calcula XP por semana, expõe nível atual em home e mostra barra com pontos faltantes até o próximo nível.
+
 ## Próximos passos
 
 1. Conectar autenticação com telas de login.
