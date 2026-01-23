@@ -5,15 +5,20 @@ import {
   CardContent,
   Grid,
   LinearProgress,
-  Typography
+  Stack,
+  Typography,
+  useTheme
 } from "@mui/material";
 import { useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useWeeklyPlan } from "../hooks/useWeeklyPlan";
+import { useProgressEntries } from "../hooks/useProgressEntries";
 
 export function HomePage() {
+  const theme = useTheme();
   const { profile } = useAuth();
   const { week, loading, error } = useWeeklyPlan();
+  const { entries: progressEntries } = useProgressEntries();
 
   const completedWorkouts = useMemo(
     () => week?.workouts.days.filter((day) => day.completed).length ?? 0,
@@ -37,6 +42,33 @@ export function HomePage() {
 
   const points = profile?.stats?.pointsThisWeek ?? 0;
 
+  const latestEntry = progressEntries[progressEntries.length - 1];
+  const firstEntry = progressEntries[0];
+  const weightDifference =
+    latestEntry && firstEntry
+      ? parseFloat((latestEntry.weightKg - firstEntry.weightKg).toFixed(1))
+      : null;
+  const diffLabel =
+    weightDifference !== null ? `${weightDifference > 0 ? "+" : ""}${weightDifference.toFixed(1)} kg` : "---";
+  const diffSubtitle =
+    weightDifference === null
+      ? "Registre dois pesos para ver a diferença."
+      : weightDifference > 0
+      ? "Peso em tendência de alta"
+      : weightDifference < 0
+      ? "Peso em tendência de queda"
+      : "Peso estável";
+
+  const sparkData = progressEntries.slice(-5);
+  const sparkWeights = sparkData.map((entry) => entry.weightKg);
+  const sparkMin = sparkWeights.length ? Math.min(...sparkWeights) : 0;
+  const sparkMax = sparkWeights.length ? Math.max(...sparkWeights) : 0;
+  const sparkRange = sparkMax - sparkMin || 1;
+  const sparkBars = sparkData.map((entry) => ({
+    key: entry.date,
+    height: 12 + ((entry.weightKg - sparkMin) / sparkRange) * 70
+  }));
+
   return (
     <Box px={{ xs: 2, md: 4 }} py={4}>
       {error && (
@@ -46,9 +78,56 @@ export function HomePage() {
         </Alert>
       )}
       <Typography variant="h4" gutterBottom>
-        SouFIT
+        Visão geral
       </Typography>
       <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Card elevation={3}>
+            <CardContent>
+              <Typography variant="subtitle1" gutterBottom>
+                Progresso de peso
+              </Typography>
+              <Stack direction="row" spacing={2} alignItems="baseline">
+                <Typography variant="h4">
+                  {latestEntry ? `${latestEntry.weightKg} kg` : "---"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {diffLabel}
+                </Typography>
+              </Stack>
+              <Typography variant="body2" color="text.secondary">
+                Diferença desde o primeiro registro: {diffLabel}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {diffSubtitle}
+              </Typography>
+              {sparkBars.length ? (
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  alignItems="flex-end"
+                  sx={{ height: 60, mt: 2 }}
+                >
+                  {sparkBars.map((bar) => (
+                    <Box
+                      key={bar.key}
+                      sx={{
+                        flex: 1,
+                        borderRadius: 2,
+                        background: `linear-gradient(180deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+                        height: `${bar.height}%`
+                      }}
+                    />
+                  ))}
+                </Stack>
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                  Registre mais entradas para visualizar a tendência.
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
         <Grid item xs={12} md={6}>
           <Card elevation={3}>
             <CardContent>
