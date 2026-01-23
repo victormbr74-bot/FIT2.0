@@ -14,6 +14,12 @@ npm run dev
 
 3. O Vite serve a aplicação e registra o `manifest.json` para habilitar a instalação como PWA.
 
+## Configuração do Firebase
+
+1. Copie `.env.example` para `.env` e preencha as chaves `VITE_FIREBASE_*` fornecidas pelo console Firebase (Auth/Firestore/Storage).
+2. As variáveis são utilizadas em `src/services/firebase.ts`; se algum valor estiver ausente, a aplicação mostra "Configure o Firebase no .env" durante a inicialização.
+3. Depois de configurar, rode novamente `npm run dev` para testar o login e cadastro.
+
 ## Modelo de dados
 
 O Firestore mantém semanas de treino pelo documento `userWeeks/{uid}_{weekId}` e cada treino possui dias com itens:
