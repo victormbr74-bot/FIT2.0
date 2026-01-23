@@ -2,15 +2,18 @@ import {
   Alert,
   Box,
   Button,
+  FormControlLabel,
   MenuItem,
   Paper,
   Stack,
+  Switch,
   TextField,
   Typography
 } from "@mui/material";
 import { doc, serverTimestamp, updateDoc } from "firebase/firestore";
 import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { useThemeMode } from "../contexts/ThemeContext";
 import { firestore } from "../services/firebase";
 
 type SettingsForm = {
@@ -21,6 +24,7 @@ type SettingsForm = {
 
 export function SettingsPage() {
   const { user, profile } = useAuth();
+  const { mode, toggleMode } = useThemeMode();
   const [form, setForm] = useState<SettingsForm>({
     goal: profile?.goal ?? "",
     weightKg: profile?.weightKg ? String(profile.weightKg) : "",
@@ -83,6 +87,11 @@ export function SettingsPage() {
       <Paper elevation={3} sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
           <Stack spacing={2}>
+            <FormControlLabel
+              control={<Switch checked={mode === "dark"} onChange={toggleMode} />}
+              label="Tema escuro"
+              sx={{ alignSelf: "flex-start" }}
+            />
             <TextField
               select
               label="Objetivo"
