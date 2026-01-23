@@ -26,6 +26,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { getWeekId } from "../utils/week";
 import { firestore, storage } from "../services/firebase";
 import { useWeeklyPlan } from "../hooks/useWeeklyPlan";
+import { getLevelFromTotalPoints } from "../services/level";
 
 type SnackState = {
   message: string;
@@ -124,15 +125,19 @@ export function DietPage() {
       idx === index ? { ...day, completed: !day.completed } : day
     );
 
-    try {
-      await setDoc(weekRef, { diet: { days: updatedDays } }, { merge: true });
       const change = updatedDays[index].completed ? 5 : -5;
-      await updateDoc(weekRef, { points: increment(change) });
-      await updateDoc(userRef, {
-        "stats.pointsThisWeek": increment(change),
-        "stats.totalPoints": increment(change)
-      });
-    } catch (err) {
+      const currentTotal = profile?.stats?.totalPoints ?? 0;
+      const levelInfo = getLevelFromTotalPoints(Math.max(currentTotal + change, 0));
+
+      try {
+        await setDoc(weekRef, { diet: { days: updatedDays } }, { merge: true });
+        await updateDoc(weekRef, { points: increment(change) });
+        await updateDoc(userRef, {
+          "stats.pointsThisWeek": increment(change),
+          "stats.totalPoints": increment(change),
+          "stats.level": levelInfo.level
+        });
+      } catch (err) {
       setError(
         err instanceof Error ? err.message : "Não foi possível atualizar o checklist."
       );

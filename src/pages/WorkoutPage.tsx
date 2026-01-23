@@ -32,6 +32,7 @@ import { getWeekId } from "../utils/week";
 import { firestore } from "../services/firebase";
 import { useWeeklyPlan } from "../hooks/useWeeklyPlan";
 import { MediaInfo, WorkoutItem, exerciseLibrary } from "../services/workoutGenerator";
+import { getLevelFromTotalPoints } from "../services/level";
 
 const CUSTOM_TIPS = ["Mantenha o core firme", "Respire de forma controlada"];
 
@@ -93,7 +94,7 @@ const buildMediaFromLink = (value: string): MediaInfo | undefined => {
 };
 
 export function WorkoutPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -177,18 +178,22 @@ export function WorkoutPage() {
       index === dayIndex ? { ...dayEntry, completed: true } : dayEntry
     );
 
+    const change = 10;
+    const currentTotal = profile?.stats?.totalPoints ?? 0;
+    const levelInfo = getLevelFromTotalPoints(currentTotal + change);
     setSaving(true);
     setError(null);
 
-    try {
-      await updateDoc(weekRef, {
-        workouts: { days: updatedDays },
-        points: increment(10)
-      });
-      await updateDoc(userRef, {
-        "stats.pointsThisWeek": increment(10),
-        "stats.totalPoints": increment(10)
-      });
+      try {
+        await updateDoc(weekRef, {
+          workouts: { days: updatedDays },
+          points: increment(10)
+        });
+        await updateDoc(userRef, {
+          "stats.pointsThisWeek": increment(10),
+          "stats.totalPoints": increment(10),
+          "stats.level": levelInfo.level
+        });
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Não foi possível concluir o treino do dia."

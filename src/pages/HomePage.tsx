@@ -13,6 +13,7 @@ import { useMemo } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useWeeklyPlan } from "../hooks/useWeeklyPlan";
 import { useProgressEntries } from "../hooks/useProgressEntries";
+import { getLevelFromTotalPoints } from "../services/level";
 
 export function HomePage() {
   const theme = useTheme();
@@ -41,6 +42,15 @@ export function HomePage() {
     : 0;
 
   const points = profile?.stats?.pointsThisWeek ?? 0;
+
+  const levelInfo = getLevelFromTotalPoints(profile?.stats?.totalPoints ?? 0);
+  const nextLevelDelta = Math.max(levelInfo.nextLevelPoints - levelInfo.currentLevelProgress, 0);
+  const levelProgressPercent = Math.min(
+    Math.round(
+      (levelInfo.currentLevelProgress / (levelInfo.nextLevelPoints || 1)) * 100
+    ),
+    100
+  );
 
   const latestEntry = progressEntries[progressEntries.length - 1];
   const firstEntry = progressEntries[0];
@@ -155,6 +165,18 @@ export function HomePage() {
                 color="success"
               />
               <Typography variant="caption">Ganhe pontos concluindo treinos e dieta</Typography>
+              <Stack spacing={1} sx={{ mt: 2 }}>
+                <Typography variant="subtitle2">Nível atual</Typography>
+                <Typography variant="h6">Nível {levelInfo.level}</Typography>
+                <LinearProgress
+                  value={levelProgressPercent}
+                  variant="determinate"
+                  color="secondary"
+                />
+                <Typography variant="caption" color="text.secondary">
+                  Faltam {nextLevelDelta} pontos para o próximo nível
+                </Typography>
+              </Stack>
             </CardContent>
           </Card>
         </Grid>

@@ -58,6 +58,7 @@ export type UserProfile = {
     lastWeekId?: string;
     pointsThisWeek?: number;
     totalPoints?: number;
+    level?: number;
   };
 };
 
@@ -146,7 +147,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: credentials.user.email ?? email,
       onboardingComplete: false,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
+      stats: {
+        pointsThisWeek: 0,
+        totalPoints: 0,
+        level: 1
+      }
     };
 
     await setDoc(doc(firestore, "users", credentials.user.uid), profileData, {
