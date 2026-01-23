@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/FIT2.0/manifest.json', { scope: '/FIT2.0/' })})}
