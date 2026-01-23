@@ -48,6 +48,11 @@ export type UserProfile = {
   diet?: {
     currentPdfUrl?: string;
     updatedAt?: FirestoreTimestamp;
+    manual?: {
+      notes?: string;
+      meals?: string[];
+      updatedAt?: FirestoreTimestamp;
+    };
   };
   stats?: {
     lastWeekId?: string;
