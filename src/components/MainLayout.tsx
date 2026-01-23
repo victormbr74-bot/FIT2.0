@@ -1,5 +1,6 @@
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   CssBaseline,
@@ -10,7 +11,10 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Toolbar,
+  Tooltip,
   Typography,
   useTheme
 } from "@mui/material";
@@ -65,8 +69,9 @@ function NavigationList({ onClick }: { onClick?: () => void }) {
 export function MainLayout() {
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { logout } = useAuth();
+  const { logout, profile } = useAuth();
   const navigate = useNavigate();
+  const [profileAnchor, setProfileAnchor] = useState<null | HTMLElement>(null);
 
   const handleDrawerToggle = () => {
     setMobileOpen((prev) => !prev);
@@ -75,6 +80,19 @@ export function MainLayout() {
   const handleLogout = async () => {
     await logout();
     navigate("/login");
+  };
+
+  const handleProfileClick = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileAnchor(event.currentTarget);
+  };
+
+  const handleProfileClose = () => {
+    setProfileAnchor(null);
+  };
+
+  const goToSettings = () => {
+    navigate("/settings");
+    handleProfileClose();
   };
 
   const drawerContent = (
@@ -106,20 +124,65 @@ export function MainLayout() {
           zIndex: theme.zIndex.drawer + 1
         }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            sx={{ mr: 2, display: { sm: "none" } }}
-            onClick={handleDrawerToggle}
-            size="large"
-          >
-            <MenuIcon />
-          </IconButton>
+      <Toolbar>
+        <IconButton
+          color="inherit"
+          edge="start"
+          sx={{ mr: 2, display: { sm: "none" } }}
+          onClick={handleDrawerToggle}
+          size="large"
+        >
+          <MenuIcon />
+        </IconButton>
+        <Box
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1
+          }}
+        >
           <Typography variant="h6" noWrap component="div">
-            SouFIT
+            Olá, {profile?.name ?? "SouFIT"}
           </Typography>
-        </Toolbar>
+        </Box>
+        <Tooltip title="Abrir menu de perfil">
+          <IconButton
+            onClick={handleProfileClick}
+            size="large"
+            edge="end"
+            color="inherit"
+            sx={{ ml: 1 }}
+          >
+            <Avatar sx={{ bgcolor: theme.palette.secondary.main }}>
+              {profile?.name?.[0] ?? "S"}
+            </Avatar>
+          </IconButton>
+        </Tooltip>
+        <Menu
+          anchorEl={profileAnchor}
+          open={Boolean(profileAnchor)}
+          onClose={handleProfileClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right"
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right"
+          }}
+        >
+          <MenuItem onClick={goToSettings}>Configurações</MenuItem>
+          <MenuItem
+            onClick={() => {
+              handleProfileClose();
+              handleLogout();
+            }}
+          >
+            Sair
+          </MenuItem>
+        </Menu>
+      </Toolbar>
       </AppBar>
       <Drawer
         variant="temporary"
