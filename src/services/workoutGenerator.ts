@@ -49,7 +49,7 @@ const normalizedBasePath = basePath.endsWith("/")
   : `${basePath}/`;
 const localGifFallback = `${normalizedBasePath}gifs/plank.gif`;
 
-const exerciseLibrary: ExerciseData[] = [
+export const exerciseLibrary: ExerciseData[] = [
   {
     name: "Agachamento com peso do corpo",
     tags: ["emagrecimento", "hipertrofia", "condicionamento"],
